@@ -1,14 +1,13 @@
-from rest_framework import viewsets, serializers
-from rest_framework import mixins
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.filters import SearchFilter
-
 from django.shortcuts import get_object_or_404
+from posts.models import Comment, Follow, Group, Post, User
+from rest_framework import mixins, viewsets
+from rest_framework.filters import SearchFilter
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticated
 
-from posts.models import Comment, Group, Post, Follow, User
-from .serializers import CommentSerializer, GroupSerializer, PostSerializer, FollowSerializer
 from .permissions import IsAuthorOrReadOnlyPermission
+from .serializers import (CommentSerializer, FollowSerializer, GroupSerializer,
+                          PostSerializer)
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -43,7 +42,8 @@ class CommentViewSet(viewsets.ModelViewSet):
                         post=post)
 
 
-class ListCreateViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+class ListCreateViewSet(mixins.ListModelMixin, mixins.CreateModelMixin,
+                        viewsets.GenericViewSet):
     pass
     # А можно в FollowViewSet указывать миксины и дженерик?
     # Или лучше все таки отдельно собрать миксины и создать класс

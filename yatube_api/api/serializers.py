@@ -1,9 +1,6 @@
+from posts.models import Comment, Follow, Group, Post, User
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField, PrimaryKeyRelatedField
-from rest_framework.validators import UniqueTogetherValidator
-from django.shortcuts import get_object_or_404
-
-from posts.models import Comment, Group, Post, Follow, User
+from rest_framework.relations import PrimaryKeyRelatedField, SlugRelatedField
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -34,7 +31,8 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class FollowSerializer(serializers.ModelSerializer):
     user = SlugRelatedField(slug_field='username', read_only=True)
-    following = SlugRelatedField(slug_field='username', queryset=User.objects.all())
+    following = SlugRelatedField(slug_field='username',
+                                 queryset=User.objects.all())
 
     class Meta:
         model = Follow
