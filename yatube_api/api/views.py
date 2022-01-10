@@ -3,7 +3,7 @@ from posts.models import Comment, Follow, Group, Post, User
 from rest_framework import mixins, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
 from .permissions import IsAuthorOrReadOnlyPermission
 from .serializers import (CommentSerializer, FollowSerializer, GroupSerializer,
@@ -13,7 +13,7 @@ from .serializers import (CommentSerializer, FollowSerializer, GroupSerializer,
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [IsAuthorOrReadOnlyPermission]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnlyPermission]
     pagination_class = LimitOffsetPagination
 
     def perform_create(self, serializer):
@@ -27,7 +27,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthorOrReadOnlyPermission]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnlyPermission]
 
     def get_queryset(self):
         pk = int(self.kwargs.get('post_id'))
@@ -42,15 +42,8 @@ class CommentViewSet(viewsets.ModelViewSet):
                         post=post)
 
 
-class ListCreateViewSet(mixins.ListModelMixin, mixins.CreateModelMixin,
-                        viewsets.GenericViewSet):
-    pass
-    # А можно в FollowViewSet указывать миксины и дженерик?
-    # Или лучше все таки отдельно собрать миксины и создать класс
-    # от которогно потом наследоваться?
-
-
-class FollowViewSet(ListCreateViewSet):
+class FollowViewSet(mixins.ListModelMixin, mixins.CreateModelMixin,
+                    viewsets.GenericViewSet):
     serializer_class = FollowSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = (SearchFilter,)
@@ -58,11 +51,12 @@ class FollowViewSet(ListCreateViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        following = Follow.objects.filter(user=user)
+        following = Follow.objects.filter(user__username=user)
+        # не понимаю как именно тут related_name реализовать еще
         return following
 
     def perform_create(self, serializer):
         following = serializer.validated_data.get('following')
-        username_following = User.objects.get(username=following)
+        username_following = get_object_or_404(User, username=following)
         serializer.save(user=self.request.user,
                         following=username_following)
