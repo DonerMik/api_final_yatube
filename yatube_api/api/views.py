@@ -53,6 +53,7 @@ class FollowViewSet(mixins.ListModelMixin, mixins.CreateModelMixin,
         user = self.request.user
         following = Follow.objects.filter(user__username=user)
         # не понимаю как именно тут related_name реализовать еще
+        # оригинальная документация DRF работает?
         return following
 
     def perform_create(self, serializer):
