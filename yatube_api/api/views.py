@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from posts.models import Comment, Follow, Group, Post, User
+from posts.models import Comment, Group, Post, User
 from rest_framework import mixins, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
