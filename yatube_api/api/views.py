@@ -47,13 +47,11 @@ class FollowViewSet(mixins.ListModelMixin, mixins.CreateModelMixin,
     serializer_class = FollowSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = (SearchFilter,)
-    search_fields = ('following__username',)
+    search_fields = ('following__username', 'user__username')
 
     def get_queryset(self):
         user = self.request.user
-        following = Follow.objects.filter(user__username=user)
-        # не понимаю как именно тут related_name реализовать еще
-        # оригинальная документация DRF работает?
+        following = user.follower.all()
         return following
 
     def perform_create(self, serializer):
